@@ -1,25 +1,29 @@
-from flask import Flask, request
-from twilio.twiml.voice_response import VoiceResponse
+
+from flask import Flask, request, Response
 import openai
+import os
 
-openai.api_key = "вставь_сюда_свой_OpenAI_API_ключ"
+app = Flask(_name_)
 
-app = Flask(__name__)
+openai.api_key = os.environ.get("OPENAI_API_KEY")
 
 @app.route("/voice", methods=["POST"])
 def voice():
-    user_input = request.form.get('SpeechResult', 'Привет! Чем могу помочь?')
-
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
-        messages=[{"role": "user", "content": user_input}]
+        messages=[
+            {"role": "system", "content": "Ты — голосовой ассистент."},
+            {"role": "user", "content": "Скажи что-нибудь приветственное"}
+        ]
     )
-    ai_reply = response['choices'][0]['message']['content']
+    text = response.choices[0].message.content
 
-    twiml = VoiceResponse()
-    twiml.say(ai_reply, voice='alice', language='en-US')
+    twiml = f"""<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Say>{text}</Say>
+</Response>"""
+    return Response(twiml, mimetype="text/xml")
 
-    return str(twiml)
-
-if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+if _name_ == "_main_":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
