@@ -7,4 +7,5 @@ app = Flask(__name__)
 def voice():
     resp = VoiceResponse()
     resp.say("Привет! Это голосовой бот на Render и Twilio.", language="ru-RU")
-    return str(resp)
+    return str(resp),
+mimetype='text/xml')
