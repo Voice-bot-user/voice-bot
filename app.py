@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, Response
 from twilio.twiml.voice_response import VoiceResponse
 
 app = Flask(__name__)
@@ -7,5 +7,4 @@ app = Flask(__name__)
 def voice():
     resp = VoiceResponse()
     resp.say("Привет! Это голосовой бот на Render и Twilio.", language="ru-RU")
-    return str(resp),
-mimetype='text/xml')
+    return Response(str(resp), mimetype='text/xml') 
