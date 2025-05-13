@@ -33,7 +33,6 @@ def voice():
         voice="Polly.Tatyana-Neural"
     )
     resp.append(gather)
-
     return Response(str(resp), mimetype='text/xml')
 
 @app.route("/language_selected", methods=["POST"])
@@ -42,21 +41,18 @@ def language_selected():
     resp = VoiceResponse()
 
     if digit == "1":
-        lang = "de"
         resp.say(
             '<speak>Sie haben Deutsch gewählt. <break time="400ms"/> Wir beginnen jetzt das Gespräch.</speak>',
             language="de-DE",
             voice="Polly.Vicki-Neural"
         )
     elif digit == "2":
-        lang = "en"
         resp.say(
             '<speak>You selected English. <break time="400ms"/> Let\'s start our conversation.</speak>',
             language="en-US",
             voice="Polly.Joanna-Neural"
         )
     elif digit == "3":
-        lang = "ru"
         resp.say(
             '<speak>Вы выбрали русский язык. <break time="400ms"/> Начинаем разговор.</speak>',
             language="ru-RU",
@@ -68,24 +64,6 @@ def language_selected():
             language="ru-RU",
             voice="Polly.Tatyana-Neural"
         )
-        resp.redirect("/voice")
-        return Response(str(resp), mimetype='text/xml')
-
-    resp.redirect(f"/chat?lang={lang}")
-    return Response(str(resp), mimetype='text/xml')
-
-@app.route("/chat", methods=["POST", "GET"])
-def chat():
-    lang = request.args.get("lang", "de")
-    resp = VoiceResponse()
-
-    if lang == "de":
-        resp.say("Das Gespräch beginnt auf Deutsch.", language="de-DE", voice="Polly.Vicki-Neural")
-    elif lang == "en":
-        resp.say("The conversation will be in English.", language="en-US", voice="Polly.Joanna-Neural")
-    elif lang == "ru":
-        resp.say("Разговор будет на русском языке.", language="ru-RU", voice="Polly.Tatyana-Neural")
-    else:
-        resp.say("Язык не распознан. Начинаем по умолчанию.", language="en-US", voice="Polly.Joanna-Neural")
+        resp.redirect("/voice")  # только если неправильный ввод
 
     return Response(str(resp), mimetype='text/xml')
