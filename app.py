@@ -10,12 +10,28 @@ def voice():
         num_digits=1,
         action="/language_selected",
         method="POST",
-        timeout=5
+        timeout=7
     )
-    gather.say("Willkommen! Welcome! Добро пожаловать!", language="de-DE")
-    gather.say("Für Deutsch drücken Sie eins.", language="de-DE")
-    gather.say("For English, press two.", language="en-US")
-    gather.say("Для русского языка нажмите три.", language="ru-RU")
+    gather.say(
+        '<speak>Willkommen! <break time="300ms"/> Welcome! <break time="300ms"/> Добро пожаловать!</speak>',
+        language="de-DE",
+        voice="Polly.Vicki-Neural"
+    )
+    gather.say(
+        '<speak>Für Deutsch drücken Sie eins.</speak>',
+        language="de-DE",
+        voice="Polly.Vicki-Neural"
+    )
+    gather.say(
+        '<speak>For English, press two.</speak>',
+        language="en-US",
+        voice="Polly.Joanna-Neural"
+    )
+    gather.say(
+        '<speak>Для русского языка нажмите три.</speak>',
+        language="ru-RU",
+        voice="Polly.Tatyana-Neural"
+    )
     return Response(str(resp), mimetype='text/xml')
 
 @app.route("/language_selected", methods=["POST"])
@@ -25,15 +41,31 @@ def language_selected():
 
     if digit == "1":
         lang = "de"
-        resp.say("Вы выбрали немецкий.", language="de-DE")
+        resp.say(
+            '<speak>Sie haben Deutsch gewählt. <break time="400ms"/> Wir beginnen jetzt das Gespräch.</speak>',
+            language="de-DE",
+            voice="Polly.Vicki-Neural"
+        )
     elif digit == "2":
         lang = "en"
-        resp.say("You selected English.", language="en-US")
+        resp.say(
+            '<speak>You selected English. <break time="400ms"/> Let\'s start our conversation.</speak>',
+            language="en-US",
+            voice="Polly.Joanna-Neural"
+        )
     elif digit == "3":
         lang = "ru"
-        resp.say("Вы выбрали русский язык.", language="ru-RU")
+        resp.say(
+            '<speak>Вы выбрали русский язык. <break time="400ms"/> Начинаем разговор.</speak>',
+            language="ru-RU",
+            voice="Polly.Tatyana-Neural"
+        )
     else:
-        resp.say("Неверный ввод. Попробуйте снова.", language="ru-RU")
+        resp.say(
+            '<speak>Неверный ввод. Попробуйте снова.</speak>',
+            language="ru-RU",
+            voice="Polly.Tatyana-Neural"
+        )
         resp.redirect("/voice")
         return Response(str(resp), mimetype='text/xml')
 
@@ -46,12 +78,12 @@ def chat():
     resp = VoiceResponse()
 
     if lang == "de":
-        resp.say("Das Gespräch beginnt auf Deutsch.", language="de-DE")
+        resp.say("Das Gespräch beginnt auf Deutsch.", language="de-DE", voice="Polly.Vicki-Neural")
     elif lang == "en":
-        resp.say("The conversation will be in English.", language="en-US")
+        resp.say("The conversation will be in English.", language="en-US", voice="Polly.Joanna-Neural")
     elif lang == "ru":
-        resp.say("Разговор будет на русском языке.", language="ru-RU")
+        resp.say("Разговор будет на русском языке.", language="ru-RU", voice="Polly.Tatyana-Neural")
     else:
-        resp.say("Язык не распознан. Начинаем по-умолчанию.", language="en-US")
+        resp.say("Язык не распознан. Начинаем по умолчанию.", language="en-US", voice="Polly.Joanna-Neural")
 
     return Response(str(resp), mimetype='text/xml')
