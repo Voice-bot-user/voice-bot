@@ -1,7 +1,7 @@
 from flask import Flask, request, Response
 from twilio.twiml.voice_response import VoiceResponse, Gather
 
-app = Flask(_name_)
+app = Flask(__name__)
 
 @app.route("/voice", methods=["POST"])
 def voice():
@@ -32,5 +32,5 @@ def language_selected():
     
     return Response(str(resp), mimetype="text/xml")
 
-if _name_ == "_main_":
+if __name__ == "__main__":
     app.run()
