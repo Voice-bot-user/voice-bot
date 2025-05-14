@@ -81,5 +81,5 @@ def language_selected():
     # Здесь потом будем запускать чат-поток на выбранном языке
     return Response(str(resp), mimetype='text/xml')
 
-if _name_ == "__main__":
+if __name__ == "__main__":
     app.run()
