@@ -1,68 +1,33 @@
-from flask import Flask, request, Response
+from flask import Flask, request
 from twilio.twiml.voice_response import VoiceResponse, Gather
 
 app = Flask(__name__)
 
 @app.route("/voice", methods=["POST"])
 def voice():
-    resp = VoiceResponse()
-    
-    gather = Gather(
-        input="dtmf", 
-        timeout=5, 
-        num_digits=1, 
-        action="/language_selected", 
-        method="POST"
-    )
-    
-    gather.say(
-        '<speak>'
-        'Добро пожаловать! <break time="300ms"/> '
-        'Для немецкого языка нажмите один. <break time="300ms"/> '
-        'For English, press two. <break time="300ms"/> '
-        'Для русского языка нажмите три.'
-        '</speak>',
-        language="ru-RU",
-        voice="Polly.Tatyana-Neural"
-    )
-    
-    resp.append(gather)
-    resp.redirect("/voice")  # если нет ответа — повторяет
+    response = VoiceResponse()
+    gather = Gather(num_digits=1, action="/handle-language", method="POST")
+    gather.say("Здравствуйте! Для продолжения выберите язык. Нажмите 1 для русского, 2 для немецкого, 3 для английского.", language="ru-RU")
+    response.append(gather)
+    response.redirect("/voice")  # если не выбрал — повтор
+    return str(response)
 
-    return Response(str(resp), mimetype="text/xml")
+@app.route("/handle-language", methods=["POST"])
+def handle_language():
+    digit = request.form.get("Digits")
+    response = VoiceResponse()
 
-@app.route("/language_selected", methods=["POST"])
-def language_selected():
-    digits = request.form.get('Digits')
-    resp = VoiceResponse()
-
-    if digits == "1":
-        resp.say(
-            '<speak>Вы выбрали немецкий язык. <break time="400ms"/> Начинаем разговор.</speak>',
-            language="de-DE",
-            voice="Polly.Vicki-Neural"
-        )
-    elif digits == "2":
-        resp.say(
-            '<speak>You selected English. <break time="400ms"/> Let\'s start the conversation.</speak>',
-            language="en-US",
-            voice="Polly.Joanna-Neural"
-        )
-    elif digits == "3":
-        resp.say(
-            '<speak>Вы выбрали русский язык. <break time="400ms"/> Начинаем разговор.</speak>',
-            language="ru-RU",
-            voice="Polly.Tatyana-Neural"
-        )
+    if digit == "1":
+        response.say("Вы выбрали русский язык. Чем я могу помочь?", language="ru-RU")
+    elif digit == "2":
+        response.say("Sie haben Deutsch gewählt. Wie kann ich helfen?", language="de-DE")
+    elif digit == "3":
+        response.say("You have selected English. How can I help you?", language="en-US")
     else:
-        resp.say(
-            '<speak>Неверный ввод. <break time="300ms"/> Попробуйте снова.</speak>',
-            language="ru-RU",
-            voice="Polly.Tatyana-Neural"
-        )
-        resp.redirect("/voice")
-    
-    return Response(str(resp), mimetype="text/xml")
+        response.say("Неверный выбор. Попробуйте снова.", language="ru-RU")
+        response.redirect("/voice")
+
+    return str(response)
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)
