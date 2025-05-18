@@ -21,6 +21,8 @@ def handle_language():
         gather = Gather(num_digits=1, action="/handle-topic", method="POST")
         gather.say("Спасибо, продолжаем на русском. Выберите направление: 1 — солнечные панели, 2 — тепловые насосы, 3 — другие вопросы.", language="ru-RU")
         response.append(gather)
+        return str(responce)
+
     elif digit == "2":
         response.say("Deutsch folgt demnächst.", language="de-DE")
     elif digit == "3":
