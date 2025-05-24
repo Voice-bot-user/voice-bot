@@ -1,68 +1,72 @@
 import os
-from flask import Flask, request
+from flask import Flask, request, url_for
 from twilio.twiml.voice_response import VoiceResponse, Gather
 
 app = Flask(__name__)
 LANG = "ru-RU"
-BASE_URL = "https://solimaxvoice.online"
 
 
 @app.route("/voice", methods=["POST"])
 def voice():
+    print("[VOICE] Старт диалога")
     resp = VoiceResponse()
     g = Gather(
         num_digits=1,
-        action=f"{BASE_URL}/handle-language",
+        action=url_for("handle_language", _external=True),
         method="POST",
         timeout=5,
     )
     g.say(
-        "Здравствуйте! Для продолжения выберите язык. Нажмите 1 для русского.",
+        "Здравствуйте! Для продолжения выберите язык. "
+        "Нажмите 1 для русского.",
         language=LANG,
     )
     resp.append(g)
-    resp.redirect(f"{BASE_URL}/voice")
+    resp.redirect(url_for("voice", _external=True))
     return str(resp)
 
 
-@app.route("/handle-language", methods=["POST"])
+@app.route("/handle_language", methods=["POST"])
 def handle_language():
     digit = request.form.get("Digits")
+    print(f"[LANGUAGE] Введено: {digit}")
     resp = VoiceResponse()
 
     if digit == "1":
         g = Gather(
             num_digits=1,
-            action=f"{BASE_URL}/handle-topic",
+            action=url_for("handle_topic", _external=True),
             method="POST",
             timeout=5,
         )
         g.say(
-            "Спасибо, продолжаем на русском. Выберите направление: "
+            "Спасибо, продолжаем на русском. "
+            "Выберите направление: "
             "1 — солнечные панели, 2 — тепловые насосы, 3 — другие вопросы.",
             language=LANG,
         )
         resp.append(g)
-        resp.redirect(f"{BASE_URL}/handle-language")
+        resp.redirect(url_for("handle_language", _external=True))
     else:
         resp.say(
             "Выбранный язык пока не поддерживается. Попробуйте снова.",
             language=LANG,
         )
-        resp.redirect(f"{BASE_URL}/voice")
+        resp.redirect(url_for("voice", _external=True))
 
     return str(resp)
 
 
-@app.route("/handle-topic", methods=["POST"])
+@app.route("/handle_topic", methods=["POST"])
 def handle_topic():
     digit = request.form.get("Digits")
+    print(f"[TOPIC] Введено: {digit}")
     resp = VoiceResponse()
 
     if digit == "1":
         g = Gather(
             num_digits=1,
-            action=f"{BASE_URL}/handle-solar",
+            action=url_for("handle_solar", _external=True),
             method="POST",
             timeout=5,
         )
@@ -73,12 +77,12 @@ def handle_topic():
             language=LANG,
         )
         resp.append(g)
-        resp.redirect(f"{BASE_URL}/handle-topic")
+        resp.redirect(url_for("handle_topic", _external=True))
 
     elif digit == "2":
         g = Gather(
             num_digits=1,
-            action=f"{BASE_URL}/handle-heat",
+            action=url_for("handle_heat", _external=True),
             method="POST",
             timeout=5,
         )
@@ -89,18 +93,20 @@ def handle_topic():
             language=LANG,
         )
         resp.append(g)
-        resp.redirect(f"{BASE_URL}/handle-topic")
+        resp.redirect(url_for("handle_topic", _external=True))
 
     elif digit == "3":
+        print("[TOPIC] Другие вопросы — конец диалога")
         resp.say("Опишите ваш вопрос, и мы поможем. Спасибо!", language=LANG)
     else:
         resp.say("Неверный выбор. Попробуйте снова.", language=LANG)
-        resp.redirect(f"{BASE_URL}/handle-language")
+        resp.redirect(url_for("handle_language", _external=True))
 
     return str(resp)
 
 
 def _final(theme: str, digit: str) -> VoiceResponse:
+    print(f"[FINAL] Тема: {theme}, Выбор: {digit}")
     resp = VoiceResponse()
 
     if digit == "1":
@@ -117,19 +123,21 @@ def _final(theme: str, digit: str) -> VoiceResponse:
         )
     else:
         resp.say("Неверный выбор. Возвращаюсь в главное меню.", language=LANG)
-        resp.redirect(f"{BASE_URL}/voice")
+        resp.redirect(url_for("voice", _external=True))
 
     return resp
 
 
-@app.route("/handle-solar", methods=["POST"])
+@app.route("/handle_solar", methods=["POST"])
 def handle_solar():
-    return str(_final("солнечных системах", request.form.get("Digits")))
+    digit = request.form.get("Digits")
+    return str(_final("солнечных системах", digit))
 
 
-@app.route("/handle-heat", methods=["POST"])
+@app.route("/handle_heat", methods=["POST"])
 def handle_heat():
-    return str(_final("тепловых насосах", request.form.get("Digits")))
+    digit = request.form.get("Digits")
+    return str(_final("тепловых насосах", digit))
 
 
 if __name__ == "__main__":
