@@ -9,28 +9,31 @@ LANG = "ru-RU"
 def voice():
     print("===> voice() called")
     resp = VoiceResponse()
-    resp.say("Здравствуйте! Нажмите 1 для русского языка.", language=LANG)
+    resp.say("Здравствуйте! Начинаем демонстрацию маршрута.", language=LANG)
     resp.redirect(url_for("handle_language", _external=True))
     return str(resp)
 
 @app.route("/handle_language", methods=["POST"])
 def handle_language():
-    digit = request.form.get("Digits")
-    print("===> handle_language() called, Digit =", digit)
+    print("===> handle_language() called")
     resp = VoiceResponse()
-
-    # Пропускаем выбор языка, сразу переходим к следующему
-    resp.say("Переходим к выбору направления.", language=LANG)
+    resp.say("Переходим к выбору темы.", language=LANG)
     resp.redirect(url_for("handle_topic", _external=True))
     return str(resp)
 
 @app.route("/handle_topic", methods=["POST"])
 def handle_topic():
-    digit = request.form.get("Digits")
-    print("===> handle_topic() called, Digit =", digit)
+    print("===> handle_topic() called")
     resp = VoiceResponse()
+    resp.say("Вы выбрали солнечные панели.", language=LANG)
+    resp.redirect(url_for("handle_solar", _external=True))
+    return str(resp)
 
-    resp.say("Вы дошли до раздела выбора направления. Всё работает.", language=LANG)
+@app.route("/handle_solar", methods=["POST"])
+def handle_solar():
+    print("===> handle_solar() called")
+    resp = VoiceResponse()
+    resp.say("Информация передана в технический отдел. Спасибо.", language=LANG)
     return str(resp)
 
 if __name__ == "__main__":
