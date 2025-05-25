@@ -1,14 +1,18 @@
 import os
+import logging
 from flask import Flask, request, url_for
 from twilio.twiml.voice_response import VoiceResponse, Gather
 
 app = Flask(__name__)
 LANG = "ru-RU"
 
+# Включаем логирование
+logging.basicConfig(level=logging.DEBUG)
+
 
 @app.route("/voice", methods=["POST"])
 def voice():
-    print("[VOICE] Старт диалога")
+    logging.debug("Route /voice called")
     resp = VoiceResponse()
     g = Gather(
         num_digits=1,
@@ -29,7 +33,7 @@ def voice():
 @app.route("/handle_language", methods=["POST"])
 def handle_language():
     digit = request.form.get("Digits")
-    print(f"[LANGUAGE] Введено: {digit}")
+    logging.debug(f"/handle_language digit={digit}")
     resp = VoiceResponse()
 
     if digit == "1":
@@ -60,7 +64,7 @@ def handle_language():
 @app.route("/handle_topic", methods=["POST"])
 def handle_topic():
     digit = request.form.get("Digits")
-    print(f"[TOPIC] Введено: {digit}")
+    logging.debug(f"/handle_topic digit={digit}")
     resp = VoiceResponse()
 
     if digit == "1":
@@ -96,7 +100,6 @@ def handle_topic():
         resp.redirect(url_for("handle_topic", _external=True))
 
     elif digit == "3":
-        print("[TOPIC] Другие вопросы — конец диалога")
         resp.say("Опишите ваш вопрос, и мы поможем. Спасибо!", language=LANG)
     else:
         resp.say("Неверный выбор. Попробуйте снова.", language=LANG)
@@ -106,7 +109,7 @@ def handle_topic():
 
 
 def _final(theme: str, digit: str) -> VoiceResponse:
-    print(f"[FINAL] Тема: {theme}, Выбор: {digit}")
+    logging.debug(f"_final theme={theme}, digit={digit}")
     resp = VoiceResponse()
 
     if digit == "1":
@@ -131,16 +134,12 @@ def _final(theme: str, digit: str) -> VoiceResponse:
 @app.route("/handle_solar", methods=["POST"])
 def handle_solar():
     digit = request.form.get("Digits")
+    logging.debug(f"/handle_solar digit={digit}")
     return str(_final("солнечных системах", digit))
 
 
 @app.route("/handle_heat", methods=["POST"])
 def handle_heat():
     digit = request.form.get("Digits")
+    logging.debug(f"/handle_heat digit={digit}")
     return str(_final("тепловых насосах", digit))
-
-
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    debug = os.environ.get("DEBUG", "false").lower() == "true"
-    app.run(host="0.0.0.0", port=port, debug=debug)
