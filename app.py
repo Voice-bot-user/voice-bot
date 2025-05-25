@@ -21,7 +21,9 @@ def voice():
 
 @app.route("/handle_language", methods=["POST"])
 def handle_language():
+    print("===> handle_language()called")
     digit = request.form.get("Digits")
+    print(f"===> digit received:{digit}")
     resp = VoiceResponse()
 
     if digit == "1":
@@ -47,7 +49,9 @@ def handle_language():
 
 @app.route("/handle_topic", methods=["POST"])
 def handle_topic():
+    print("===> handle_topic() called")
     digit = request.form.get("Digits")
+    print(f"===> topic digit received:{digit}")
     resp = VoiceResponse()
 
     if digit == "1":
