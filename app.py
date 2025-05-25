@@ -1,9 +1,11 @@
-import os
+
+   import os
 from flask import Flask, request, url_for
 from twilio.twiml.voice_response import VoiceResponse, Gather
 
 app = Flask(__name__)
 LANG = "ru-RU"
+
 
 @app.route("/voice", methods=["POST"])
 def voice():
@@ -14,16 +16,17 @@ def voice():
         method="POST",
         timeout=5,
     )
-    g.say("Здравствуйте! Для продолжения выберите язык. Нажмите 1 для русского.", language=LANG)
+    g.say(
+        "Здравствуйте! Для продолжения выберите язык. Нажмите 1 для русского.",
+        language=LANG,
+    )
     resp.append(g)
-    resp.redirect(url_for("voice", _external=True))  # fallback если не нажал
     return str(resp)
+
 
 @app.route("/handle_language", methods=["POST"])
 def handle_language():
-    print("===> handle_language()called")
     digit = request.form.get("Digits")
-    print(f"===> digit received:{digit}")
     resp = VoiceResponse()
 
     if digit == "1":
@@ -35,23 +38,20 @@ def handle_language():
         )
         g.say(
             "Спасибо, продолжаем на русском. "
-            "Выберите направление: 1 — солнечные панели, "
-            "2 — тепловые насосы, 3 — другие вопросы.",
+            "Выберите направление: 1 — солнечные панели, 2 — тепловые насосы, 3 — другие вопросы.",
             language=LANG,
         )
         resp.append(g)
-        resp.redirect(url_for("handle_language", _external=True))
     else:
         resp.say("Выбранный язык пока не поддерживается. Попробуйте снова.", language=LANG)
         resp.redirect(url_for("voice", _external=True))
 
     return str(resp)
 
+
 @app.route("/handle_topic", methods=["POST"])
 def handle_topic():
-    print("===> handle_topic() called")
     digit = request.form.get("Digits")
-    print(f"===> topic digit received:{digit}")
     resp = VoiceResponse()
 
     if digit == "1":
@@ -68,7 +68,6 @@ def handle_topic():
             language=LANG,
         )
         resp.append(g)
-        resp.redirect(url_for("handle_topic", _external=True))
 
     elif digit == "2":
         g = Gather(
@@ -84,7 +83,6 @@ def handle_topic():
             language=LANG,
         )
         resp.append(g)
-        resp.redirect(url_for("handle_topic", _external=True))
 
     elif digit == "3":
         resp.say("Опишите ваш вопрос, и мы поможем. Спасибо!", language=LANG)
@@ -94,8 +92,10 @@ def handle_topic():
 
     return str(resp)
 
+
 def _final(theme: str, digit: str) -> VoiceResponse:
     resp = VoiceResponse()
+
     if digit == "1":
         resp.say(
             "Спасибо. Ваша информация передана в технический отдел. "
@@ -111,15 +111,19 @@ def _final(theme: str, digit: str) -> VoiceResponse:
     else:
         resp.say("Неверный выбор. Возвращаюсь в главное меню.", language=LANG)
         resp.redirect(url_for("voice", _external=True))
+
     return resp
+
 
 @app.route("/handle_solar", methods=["POST"])
 def handle_solar():
     return str(_final("солнечных системах", request.form.get("Digits")))
 
+
 @app.route("/handle_heat", methods=["POST"])
 def handle_heat():
     return str(_final("тепловых насосах", request.form.get("Digits")))
+
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
